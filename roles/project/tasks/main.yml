@@ -7,6 +7,12 @@
     chdir: /home/{{ deploy_user }}/
     creates: /home/{{ deploy_user }}/{{ project_name }}
 
+- name: Create directory sockets
+  become_user: "{{ deploy_user }}"
+  become: yes
+  file:
+   path: "{{path_project}}/tmp/sockets"
+   state: directory
 # on project :
 - name: include file index.html to {{project_name}}/public
   become_user: "{{ deploy_user}}"
@@ -25,13 +31,13 @@
     replace: 'production'
 # on nginx 
 - name: NGINX --> Disable the default site
+  become: yes
   file:
-    path: "{{nginx_conf_dir}}/sites-enabled/default.conf"
+    path: "{{nginx_conf_dir}}/sites-enabled/default"
     state: absent
-  notify:
-    - reload nginx
 
 - name: NGINX --> Remove the default configuration
+  become: yes
   file:
     path: "{{nginx_conf_dir}}/conf.d/default.conf"
     state: absent
@@ -41,7 +47,22 @@
   template:
     src: nginx.conf.j2
     dest: "{{ app_nginx_conf_dir }}/nginx.conf"
-  notify:
-    - restart nginx
 
+- name: Create symbolic link 
+  become: yes
+  file:
+    src: "{{ app_nginx_conf_dir }}/nginx.conf"
+    dest: "{{ nginx_conf_dir }}/sites-enabled/nginx"
+    state: link
+- name: Restart  nginx
+  service:
+    name: nginx
+    state: restarted
+  become: yes
 
+- name : Run project {{ project_name }}
+  become_user: "{{ deploy_user }}"
+  become: yes
+  shell: bash -lc  "bundle exec puma -e production -b unix:{{ server_unix }}"
+  args:
+    chdir:  /home/{{ deploy_user }}/{{ project_name }}
