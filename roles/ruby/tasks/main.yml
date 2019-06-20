@@ -1,0 +1,70 @@
+
+
+
+- name: git clone rbenv
+  become_user: "{{ deploy_user }}"
+  become: yes
+  git: 
+    repo: https://github.com/sstephenson/rbenv.git 
+    dest: "{{ rbenv_install_dir }}"
+
+- name: git clone ruby build plugin
+  become_user: "{{ deploy_user }}"
+  become: yes
+  git: 
+    repo: https://github.com/sstephenson/ruby-build.git 
+    dest: "{{ rbenv_install_dir }}/plugins/ruby-build"
+
+- name: Set rbenv.sh on profile.d
+  become: yes
+  template:
+    src: rbenv.sh.j2
+    dest: "/etc/profile.d/rbenv.sh"
+    owner: root
+    group: root
+    mode: 0644
+  
+- name: Install ruby {{ ruby_version }} with rbenv
+  become_user: "{{ deploy_user }}"
+  become: yes
+  shell: bash -lc "CONFIGURE_OPTS="--disable-install-rdoc" rbenv install -s {{ ruby_version }}"
+
+- name: "set ruby global {{ ruby_version }} on system"
+  become_user: "{{ deploy_user }}"
+  become: yes
+  shell: bash -lc "rbenv global {{ ruby_version }} && rbenv rehash"
+
+
+
+- name: Install bundler
+  become_user: "{{ deploy_user }}"
+  become: yes
+  gem:
+    name: bundler
+    executable: "{{ rbenv_install_dir }}/shims/gem"
+
+
+- name: Install rails {{ rails_version }}
+  become_user: "{{ deploy_user }}"
+  become: yes
+  gem: 
+    name: rails
+    version: "{{ rails_version }}" # 5.2.3
+    executable: "{{ rbenv_install_dir }}/shims/gem"
+    
+- name: Update gem
+  become_user: "{{ deploy_user }}"
+  become: yes
+  shell: bash -lc "gem update --force rdoc && gem update"
+- name: "reload rbenv"
+  become_user: "{{ deploy_user }}"
+  become: yes
+  shell: bash -lc "rbenv rehash"  
+
+- name: Check rails version
+  become_user: "{{ deploy_user }}"
+  become: yes
+  shell: bash -lc "rails --version"
+  register: rails_version
+- debug: 
+    var: rails_version.stdout_lines

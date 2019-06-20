@@ -1,0 +1,17 @@
+- name: PUMA --> Install puma
+  become_user: "{{ deploy_user }}"
+  become: yes
+  gem: 
+    name: puma
+    version: "{{ puma_version }}"
+    executable: "{{ rbenv_install_dir }}/shims/gem"
+    user_install: False
+
+- name: PUMA --> Create puma systemd service
+  become: yes
+  template: src=puma.service dest=/etc/systemd/system mode=0754
+
+# - name: Check puma status
+#   shell: bash -lc "systemctl status puma"
+#   register: checkpumastatus
+# - debug: var=checkpumastatus.stdout_lines

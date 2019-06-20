@@ -1,0 +1,30 @@
+- hosts: dev
+  user: "{{ ssh_remote }}"
+  become_method: sudo
+  gather_facts: False
+
+  vars_files:
+  - vars/front.yml
+
+  pre_tasks:
+  - name: Pre install python 2
+    become: yes
+    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+
+  - name: Add the user {{ deploy_user }} with a bash shell
+    become: yes
+    user:
+      name: "{{ deploy_user }}"
+      groups: admin
+      state: present
+      shell: /bin/bash
+      append: yes
+      createhome: yes
+      home: /home/{{ deploy_user }}
+
+  roles:
+  - base 
+  - ruby 
+  - nginx 
+  - puma 
+  - project

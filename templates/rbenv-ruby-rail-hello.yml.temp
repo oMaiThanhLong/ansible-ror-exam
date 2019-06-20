@@ -1,0 +1,62 @@
+- hosts: dev
+  remote_user: ec2-user
+  vars:
+    ruby_version: 2.3.1
+    rbenv_install_dir: ~/.rbenv
+    rails_version: 5.2.1
+    application_name: "blog"
+  tasks:
+  - name: YUM --> install package , dependence
+    become: yes
+    yum:
+        name:
+          - curl-devel
+          - expat-devel
+          - gettext-devel
+          - readline-devel
+          - openssl-devel
+          - sqlite-devel
+          - zlib-devel
+          - bzip2
+          - wget
+          - vim
+          - git
+          - gcc
+          - cpan
+  - name : ensure install nodejs
+    become: yes
+    shell: curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
+  - name: NODEJS -->install
+    become: yes 
+    yum: 
+      name:
+       - nodejs 
+  - name: RUBY --> Clone rbenv from Github
+    git: repo=https://github.com/sstephenson/rbenv.git dest="{{ rbenv_install_dir }}"
+  - name: RUBY --> Clone ruby build plugin from Github
+    git: repo=https://github.com/sstephenson/ruby-build.git dest="{{ rbenv_install_dir }}/plugins/ruby-build"
+  - name: RUBY --> Update .bashrc
+    shell: |
+      echo 'export PATH="$HOME/.rbenv/bin:$PATH"
+      eval "$(rbenv init -)"' >> ~/.bashrc
+  - name: RUBY --> Install ruby with rbenv
+    shell: bash -lc "CONFIGURE_OPTS="--disable-install-rdoc" rbenv install -s {{ ruby_version }}"
+  - name: RUBY --> Set global ruby version = {{ ruby_version }}
+    shell: bash -lc "rbenv global {{ ruby_version }} && rbenv rehash"
+  - name: RAILS --> Install rails
+    gem: 
+      name: rails
+      version: "{{ rails_version }}"
+      executable: "{{ rbenv_install_dir }}/shims/gem"
+      user_install: False
+  - name: RAILS --> Install bundler
+    gem:
+      name: bundler
+      executable: "{{ rbenv_install_dir }}/shims/gem"
+      user_install: False
+  - name: APPLICATION  -->  create blog default  (hard code  "blog")
+    shell:  bash -lc "rails new {{ application_name}}"
+  - name: APPLICATION  --> run (hard code  "blog")
+    shell : bash -lc "bin/rails server -b 0.0.0.0 -d"
+    args:
+      chdir: ~/{{ application_name }}

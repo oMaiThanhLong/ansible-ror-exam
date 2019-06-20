@@ -1,0 +1,63 @@
+- name: Base Packages install for front server
+  become: yes
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  with_items:
+    - fail2ban
+    - openssl
+    - git
+    - python-pip
+    - make
+    - wget
+    - unzip
+    - logrotate
+    - zlib1g-dev
+    - libssl-dev
+    - libreadline6-dev
+    - libncurses5-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - libcurl4-openssl-dev
+    - libffi-dev
+    - libyaml-dev
+    - libsqlite3-dev
+    - sqlite3
+    - software-properties-common
+    - build-essential
+    - socat
+    - apt-transport-https
+    - nodejs
+
+- name: Check nodejs version
+  shell: bash -lc "nodejs --version"
+  register: checknodejsver
+- debug: 
+    var: checknodejsver.stdout_lines
+
+- name: Install awscli via pip
+  pip: 
+    name: awscli
+- name: Check awscli version
+  shell: bash -lc "aws --version"
+  register: checknawscliver
+- debug: 
+    var: checknawscliver.stderr_lines
+
+- name: Set PAM limits
+  become: yes
+  pam_limits:
+    domain: "*"
+    limit_type: "-"
+    limit_item: nofile
+    value: "{{ base_maxopenfile }}"
+    use_max: yes
+- name: Reload settings from all system configuration files
+  become: yes
+  shell: sysctl --system
+
+- name: set timezone to Asia/Tokyo
+  become: yes
+  timezone:
+    name: "{{ base_timezone }}"

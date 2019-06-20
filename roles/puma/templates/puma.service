@@ -1,0 +1,12 @@
+[Unit]
+Description = puma daemon
+
+[Service]
+ExecStart = {{ puma_start_script }}
+Restart = always
+Type = simple
+User = {{ puma_user }}
+Group = {{ puma_group }}
+
+[Install]
+WantedBy = multi-user.target

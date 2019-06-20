@@ -1,0 +1,33 @@
+#ssh user
+ssh_remote: ubuntu
+
+#base
+base_timezone: Asia/Tokyo
+base_maxopenfile: 65535
+
+#ruby
+deploy_user: deploy
+rbenv_install_dir: /home/{{deploy_user}}/.rbenv
+ruby_version: 2.3.1
+rails_version: 5.2.0
+upgradepkgsgem_gem_exclude: 'did_you_mean'
+
+
+#puma
+puma_version: 3.12.0
+puma_start_script: "/usr/local/webapps/puma.sh"
+puma_user: deploy
+puma_group: deploy
+
+# project 
+project_name: blog
+path_project: /home/{{deploy_user}}/{{ project_name}}
+server_unix: //{{ path_project }}/tmp/sockets/{{ project_name }}-puma.sock
+server_name: localhost
+default_server: deferred
+root: "{{ path_project }}/public"
+access_log: "{{ path_project }}/log/nginx.access.log"
+error_log: "{{ path_project }}/log/nginx.error.log "
+app_nginx_conf_dir: "{{ path_project }}/config/"
+nginx_conf_dir: /etc/nginx
+nginx_service_name: "nginx"

@@ -1,0 +1,47 @@
+- name: Create project {{ project_name }}
+  become_user: "{{ deploy_user }}"
+  become: yes
+  become_method: sudo
+  shell: bash -lc " rails new {{ project_name }} "
+  args:
+    chdir: /home/{{ deploy_user }}/
+    creates: /home/{{ deploy_user }}/{{ project_name }}
+
+# on project :
+- name: include file index.html to {{project_name}}/public
+  become_user: "{{ deploy_user}}"
+  become: yes
+  template:
+    src: index.html
+    dest: "/home/{{ deploy_user }}/{{ project_name}}/public/index.html"
+  
+# on project : change evironment of puma.rb to production
+- name: change evironment of puma.rb from development to production
+  become_user: "{{ deploy_user}}"
+  become: yes
+  replace:
+    path: /home/{{ deploy_user }}/{{ project_name}}/config/puma.rb
+    regexp: 'development'
+    replace: 'production'
+# on nginx 
+- name: NGINX --> Disable the default site
+  file:
+    path: "{{nginx_conf_dir}}/sites-enabled/default.conf"
+    state: absent
+  notify:
+    - reload nginx
+
+- name: NGINX --> Remove the default configuration
+  file:
+    path: "{{nginx_conf_dir}}/conf.d/default.conf"
+    state: absent
+
+- name: NGINX --> Copy the nginx configuration file
+  become: yes
+  template:
+    src: nginx.conf.j2
+    dest: "{{ app_nginx_conf_dir }}/nginx.conf"
+  notify:
+    - restart nginx
+
+

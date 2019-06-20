@@ -1,0 +1,10 @@
+- name: Install nginx
+  become: yes
+  apt:
+    name:
+    - nginx
+- name: Check nginx status
+  shell: bash -lc "systemctl status nginx"
+  register: checknginxstatus
+- debug: 
+    var: checknginxstatus.stdout_lines
