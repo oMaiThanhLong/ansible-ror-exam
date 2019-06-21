@@ -5,6 +5,12 @@
     - nginx
 - name: Check nginx status
   shell: bash -lc "systemctl status nginx"
-  register: checknginxstatus
+  register: nginx_status
 - debug: 
-    var: checknginxstatus.stdout_lines
+    var: nginx_status.stdout_lines
+
+- name: NGINX --> Copy extra/sites configuration files
+  become: yes
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_conf_dir }}/nginx.conf"
