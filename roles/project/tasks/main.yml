@@ -1,4 +1,4 @@
-- name: Create project {{ project_name }}
+- name: PROJECT -->  Create project {{ project_name }}
   become_user: "{{ deploy_user }}"
   become: yes
   become_method: sudo
@@ -7,14 +7,14 @@
     chdir: /home/{{ deploy_user }}/
     creates: /home/{{ deploy_user }}/{{ project_name }}
 
-- name: Create directory sockets
+- name: PROJECT -->  Create directory sockets
   become_user: "{{ deploy_user }}"
   become: yes
   file:
    path: "{{path_project}}/tmp/sockets"
    state: directory
 # on project :
-- name: include file index.html to {{project_name}}/public
+- name: PROJECT --> include file index.html to {{project_name}}/public
   become_user: "{{ deploy_user}}"
   become: yes
   template:
@@ -22,7 +22,7 @@
     dest: "/home/{{ deploy_user }}/{{ project_name}}/public/index.html"
   
 # on project : change evironment of puma.rb to production
-- name: change evironment of puma.rb from development to production
+- name: PUMA --> change evironment of puma.rb from development to production
   become_user: "{{ deploy_user}}"
   become: yes
   replace:
@@ -48,7 +48,7 @@
     src: nginx.conf.j2
     dest: "{{ app_nginx_conf_dir }}/nginx.conf"
 
-- name: Create symbolic link 
+- name: NGINX --> Create symbolic link 
   become: yes
   file:
     src: "{{ app_nginx_conf_dir }}/nginx.conf"
@@ -60,9 +60,9 @@
     state: restarted
   become: yes
 
-- name : Run project {{ project_name }}
+- name : PROJECT --> Run project {{ project_name }}
   become_user: "{{ deploy_user }}"
   become: yes
-  shell: bash -lc  "bundle exec puma -e production -b unix:{{ server_unix }}"
+  shell: bash -lc  "bundle exec puma -e production -b unix:{{ server_unix }} -d"
   args:
     chdir:  /home/{{ deploy_user }}/{{ project_name }}
