@@ -1,32 +1,41 @@
+- name: PROJECT -->Create path project 
+  become: yes
+  file:
+   path: "/usr/local/rails_app"
+   state: directory
+   owner: "{{ deploy_user }}"
+   group: "{{ deploy_user }}"
+
 - name: PROJECT -->  Create project {{ project_name }}
   become_user: "{{ deploy_user }}"
   become: yes
-  become_method: sudo
   shell: bash -lc " rails new {{ project_name }} "
   args:
-    chdir: /home/{{ deploy_user }}/
-    creates: /home/{{ deploy_user }}/{{ project_name }}
+    chdir: /usr/local/rails_app
+    creates: "{{  path_project }}"
 
 - name: PROJECT -->  Create directory sockets
-  become_user: "{{ deploy_user }}"
   become: yes
   file:
-   path: "{{path_project}}/tmp/sockets"
+   path: "{{ path_project }}/tmp/sockets"
    state: directory
+   owner: "{{ deploy_user }}" 
+   group: "{{ deploy_user }}"
+
 # on project :
 - name: PROJECT --> include file index.html to {{project_name}}/public
   become_user: "{{ deploy_user}}"
   become: yes
   template:
     src: index.html
-    dest: "/home/{{ deploy_user }}/{{ project_name}}/public/index.html"
+    dest: "{{ path_project }}/public/index.html"
   
 # on project : change evironment of puma.rb to production
 - name: PUMA --> change evironment of puma.rb from development to production
   become_user: "{{ deploy_user}}"
   become: yes
   replace:
-    path: /home/{{ deploy_user }}/{{ project_name}}/config/puma.rb
+    path: "{{ path_project }}/config/puma.rb"
     regexp: 'development'
     replace: 'production'
 # on nginx 
@@ -46,13 +55,13 @@
   become: yes
   template:
     src: nginx.conf.j2
-    dest: "{{ app_nginx_conf_dir }}/nginx.conf"
+    dest: "{{nginx_conf_dir}}/sites-available/{{ project_name }}_config.conf"
 
 - name: NGINX --> Create symbolic link 
   become: yes
   file:
-    src: "{{ app_nginx_conf_dir }}/nginx.conf"
-    dest: "{{ nginx_conf_dir }}/sites-enabled/nginx"
+    src: "{{nginx_conf_dir}}/sites-available/{{ project_name }}_config.conf"
+    dest: "{{ nginx_conf_dir }}/sites-enabled/{{ project_name }}"
     state: link
 - name: Restart  nginx
   service:
@@ -65,4 +74,4 @@
   become: yes
   shell: bash -lc  "bundle exec puma -e production -b unix:{{ server_unix }} -d"
   args:
-    chdir:  /home/{{ deploy_user }}/{{ project_name }}
+    chdir:  "{{  path_project }}"

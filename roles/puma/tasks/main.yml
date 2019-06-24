@@ -9,9 +9,9 @@
 
 - name: PUMA --> Create puma systemd service
   become: yes
-  template: src=puma.service dest=/etc/systemd/system mode=0754
-
-# - name: Check puma status
-#   shell: bash -lc "systemctl status puma"
-#   register: checkpumastatus
-# - debug: var=checkpumastatus.stdout_lines
+  template: 
+    src: puma.service 
+    dest: /etc/systemd/system
+    owner: "{{puma_user}}"
+    group: "{{puma_group}}"
+    mode: 0754

@@ -13,11 +13,13 @@
     dest: "{{ rbenv_install_dir }}/plugins/ruby-build"
 
 - name: Set rbenv.sh on profile.d
-  become_user: "{{ deploy_user }}"
   become: yes
   template:
     src: rbenv.sh.j2
     dest: "/etc/profile.d/rbenv.sh"
+    owner:  "{{ deploy_user }}"
+    group:  "{{ deploy_user }}"
+    mode: 0640
   
 - name: Install ruby {{ ruby_version }} with rbenv
   become_user: "{{ deploy_user }}"

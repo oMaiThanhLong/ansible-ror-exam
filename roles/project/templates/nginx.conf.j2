@@ -5,7 +5,7 @@ upstream puma {
 server {
   listen 80 
   default_server {{ default_server}};
-  # server_name {{ server_name }};
+  server_name {{ server_name }};
   root {{ root }};
   access_log {{ access_log }};
   error_log {{ error_log }} ;
@@ -26,6 +26,6 @@ server {
   }
 
   error_page 500 502 503 504 /500.html;
-  client_max_body_size 10M;
+  client_max_body_size 4G;
   keepalive_timeout 10;
 }

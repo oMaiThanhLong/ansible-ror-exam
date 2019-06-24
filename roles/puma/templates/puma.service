@@ -2,7 +2,8 @@
 Description = puma daemon
 
 [Service]
-ExecStart = {{ puma_start_script }}
+WorkingDirectory = /usr/local/rails_app/blog
+ExecStart = /home/deploy/.rbenv/shims/puma -C /usr/local/rails_app/blog/config/puma.rb
 Restart = always
 Type = simple
 User = {{ puma_user }}

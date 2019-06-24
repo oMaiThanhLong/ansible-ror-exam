@@ -15,10 +15,9 @@ upgradepkgsgem_gem_exclude: 'did_you_mean'
 
 #puma
 puma_version: 3.12.0
-puma_start_script: "/usr/local/webapps/puma.sh"
 puma_user: deploy
 puma_group: deploy
-
+app_path: /usr/local/rails_app/blog
 
 #nginx 
 nginx_conf_dir: "/etc/nginx"
@@ -46,11 +45,10 @@ proxy_read_timeout: 600
 
 # project 
 project_name: blog
-path_project: /home/{{deploy_user}}/{{ project_name}}
+path_project: /usr/local/rails_app/{{ project_name}}
 server_unix: //{{ path_project }}/tmp/sockets/{{ project_name }}-puma.sock
 server_name: localhost
 default_server: deferred
 root: "{{ path_project }}/public"
 access_log: "{{ path_project }}/log/nginx.access.log"
 error_log: "{{ path_project }}/log/nginx.error.log "
-app_nginx_conf_dir: "{{ path_project }}/config/"

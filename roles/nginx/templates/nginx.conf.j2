@@ -1,4 +1,4 @@
-user www-data;;
+user www-data;
 worker_processes {{ nginx_worker_processes }};
 
 error_log  {{ nginx_log_dir }}/error.log {{ nginx_error_log_level }};
@@ -27,4 +27,5 @@ http {
 
 	include /etc/nginx/mime.types;
 	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*;
 }
