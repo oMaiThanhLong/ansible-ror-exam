@@ -1,5 +1,5 @@
 #ssh user
-ssh_remote: ubuntu
+ansible_ssh_user: ""
 
 #base
 base_timezone: Asia/Tokyo

@@ -1,5 +1,5 @@
 - hosts: dev
-  user: "{{ ssh_remote }}"
+  user: "{{ ansible_ssh_user }}"
   become_method: sudo
   gather_facts: False
 
@@ -23,4 +23,4 @@
       home: /home/{{ deploy_user }}
 
   roles:
-  - puma
+  - project

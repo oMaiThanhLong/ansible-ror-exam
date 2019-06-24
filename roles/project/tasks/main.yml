@@ -54,7 +54,7 @@
 - name: NGINX --> Copy the nginx configuration file
   become: yes
   template:
-    src: nginx.conf.j2
+    src: blog_nginx.conf.j2
     dest: "{{nginx_conf_dir}}/sites-available/{{ project_name }}_config.conf"
 
 - name: NGINX --> Create symbolic link 
@@ -64,10 +64,24 @@
     dest: "{{ nginx_conf_dir }}/sites-enabled/{{ project_name }}"
     state: link
 - name: Restart  nginx
+  become: yes
   service:
     name: nginx
     state: restarted
+  register: status_nginx_project 
+- debug:
+    var: status_nginx_project.status
+
+
+- name: Restart puma
   become: yes
+  service:
+    name: puma
+    state: restarted
+  register: status_puma
+- debug:
+    var: status_puma.status
+
 
 - name : PROJECT --> Run project {{ project_name }}
   become_user: "{{ deploy_user }}"
