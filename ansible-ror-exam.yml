@@ -23,4 +23,8 @@
       home: /home/{{ deploy_user }}
 
   roles:
+  - base 
+  - ruby  
+  - nginx 
+  - puma
   - project
