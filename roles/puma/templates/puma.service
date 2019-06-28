@@ -2,7 +2,9 @@
 Description = puma daemon
 
 [Service]
-WorkingDirectory = /usr/local/rails_app/blog
+#The path to the application code root directory for execute start
+WorkingDirectory = /usr/local/rails_app/blog 
+
 ExecStart = /home/deploy/.rbenv/shims/puma -C /usr/local/rails_app/blog/config/puma.rb
 Restart = always
 Type = simple

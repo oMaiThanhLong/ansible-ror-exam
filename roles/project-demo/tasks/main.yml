@@ -9,35 +9,9 @@
 - name: PROJECT -->  Create project {{ project_name }}
   become_user: "{{ deploy_user }}"
   become: yes
-  shell: bash -lc " rails new {{ project_name }} "
-  args:
-    chdir: /usr/local/rails_app
-    creates: "{{  path_project }}"
-
-- name: PROJECT -->  Create directory sockets
-  become: yes
-  file:
-   path: "{{ path_project }}/tmp/sockets"
-   state: directory
-   owner: "{{ deploy_user }}" 
-   group: "{{ deploy_user }}"
-
-# on project :
-- name: PROJECT --> include file index.html to {{project_name}}/public
-  become_user: "{{ deploy_user}}"
-  become: yes
-  template:
-    src: index.html
-    dest: "{{ path_project }}/public/index.html"
-  
-# on project : change evironment of puma.rb to production
-- name: PUMA --> change evironment of puma.rb from development to production
-  become_user: "{{ deploy_user}}"
-  become: yes
-  replace:
-    path: "{{ path_project }}/config/puma.rb"
-    regexp: 'development'
-    replace: 'production'
+  git: 
+    repo: https://github.com/oMaiThanhLong/blog.git
+    dest: "{{ path_project }}"
 # on nginx 
 - name: NGINX --> Disable the default site
   become: yes
@@ -54,14 +28,14 @@
 - name: NGINX --> Copy the nginx configuration file
   become: yes
   template:
-    src: blog_nginx.conf.j2
-    dest: "{{nginx_conf_dir}}/sites-available/{{ project_name }}_config.conf"
+    src: config.conf.j2
+    dest: "{{nginx_conf_dir}}/sites-available/webserver.conf"
 
 - name: NGINX --> Create symbolic link 
   become: yes
   file:
-    src: "{{nginx_conf_dir}}/sites-available/{{ project_name }}_config.conf"
-    dest: "{{ nginx_conf_dir }}/sites-enabled/{{ project_name }}"
+    src: "{{nginx_conf_dir}}/sites-available/webserver.conf"
+    dest: "{{ nginx_conf_dir }}/sites-enabled/webserver"
     state: link
 - name: Restart  nginx
   become: yes
@@ -72,7 +46,6 @@
 - debug:
     var: status_nginx_project.status
 
-
 - name: Restart puma
   become: yes
   service:
@@ -82,10 +55,11 @@
 - debug:
     var: status_puma.status
 
-
 - name : PROJECT --> Run project {{ project_name }}
   become_user: "{{ deploy_user }}"
   become: yes
-  shell: bash -lc  "bundle exec puma -e production -b unix:{{ server_unix }} -d"
+  shell: | 
+    bash -lc "bundle install"
+    bash -lc  "bundle exec puma -e production -b unix:{{ server_unix }} -d"
   args:
     chdir:  "{{  path_project }}"

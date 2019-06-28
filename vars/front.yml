@@ -21,13 +21,11 @@ app_path: /usr/local/rails_app/blog
 
 #nginx 
 nginx_conf_dir: "/etc/nginx"
-nginx_web_rootdir: "/var/www/html"
 nginx_server_name: "localhost"
 nginx_service_name: "nginx"
 nginx_user: "nginx"
 nginx_group: "nginx"
 nginx_pid_file: "/var/run/nginx.pid"
-nginx_worker_processes: "auto"
 nginx_worker_connections: 1024
 nginx_worker_rlimit_nofile: 1024
 nginx_log_dir: "/var/log/nginx"
@@ -49,6 +47,6 @@ path_project: /usr/local/rails_app/{{ project_name}}
 server_unix: //{{ path_project }}/tmp/sockets/{{ project_name }}-puma.sock
 server_name: localhost
 default_server: deferred
-root: "{{ path_project }}/public"
+path_root: "{{ path_project }}/public"
 access_log: "{{ path_project }}/log/nginx.access.log"
 error_log: "{{ path_project }}/log/nginx.error.log "
